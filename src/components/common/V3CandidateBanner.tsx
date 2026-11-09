@@ -56,7 +56,8 @@ export const V3CandidateBanner = () => {
           TESTNET
         </Box>
         <Typography variant="body2">
-          The Blend V3 candidate is currently deployed on Stellar testnet for evaluation.
+          BLNT V3 is currently deployed on Stellar testnet for evaluation. It is an immutable
+          lending protocol derived from Blend and designed to support real-world assets.
           Pre-incident BLND:USDC Comet V1 LP holders can claim a BLNT backfill.
         </Typography>
       </Box>
