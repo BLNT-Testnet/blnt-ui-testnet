@@ -1,4 +1,4 @@
-import { useTheme } from '@mui/material';
+import { Typography, useTheme } from '@mui/material';
 import type { NextPage } from 'next';
 import { useEffect, useState } from 'react';
 import { Divider } from '../components/common/Divider';
@@ -50,6 +50,14 @@ const Markets: NextPage = () => {
           />
         )}
       </Row>
+      <SectionBase type="alt" sx={{ margin: '6px', padding: '12px' }}>
+        <Typography component="p" variant="body2">
+          BLNT Trade Testnet showcases BLNT V3, a Blend-derived lending protocol on Stellar
+          designed for permissionless lending and real-world assets. Explore example markets
+          including Fixed Pool V3, No Backstop, Traditional, Permissioned, and SEP-41 Assets.
+          V1/V2/V2.1 are Blend testnet markets.
+        </Typography>
+      </SectionBase>
       <Divider />
       <MarketsList version={version} />
     </>
