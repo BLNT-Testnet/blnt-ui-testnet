@@ -1,7 +1,7 @@
 import { Box, Link, Typography } from '@mui/material';
 import { ReactNode } from 'react';
 
-const EFFECTIVE_DATE = 'August 31, 2026';
+const EFFECTIVE_DATE = 'November 5, 2026';
 
 const Paragraph = ({ children }: { children: ReactNode }) => (
   <Typography variant="body2" sx={{ marginBottom: '12px' }}>
@@ -27,13 +27,12 @@ export const TOS = () => {
       <Paragraph>
         These Terms of Use (“Terms”) govern access to and use of the website and hosted user
         interface available at{' '}
-        <Link href="https://blnt.trade" target="_blank" rel="noreferrer">
-          https://blnt.trade
+        <Link href="https://blent.trade" target="_blank" rel="noreferrer">
+          https://blent.trade
         </Link>{' '}
-        and any subdomains operated by the BLNT Protocol project maintainer (collectively, the
-        “Site”). BLNT Protocol is an open-source project and is not currently an incorporated legal
-        entity. The Site is currently made available by the project maintainer (“Operator,” “we,”
-        “us,” or “our”).
+        and any subdomains (collectively, the “Site”). BLNT Protocol is an open-source project. The
+        Site is branded as BLNT Trade and made available by BLNT Protocol LLC, a Colorado limited
+        liability company doing business as BLNT Trade (“Operator,” “we,” “us,” or “our”).
       </Paragraph>
 
       <Paragraph>
@@ -139,8 +138,8 @@ export const TOS = () => {
       <Paragraph>
         Source code used by the Site is available under the licenses identified in its repositories.
         Those licenses, rather than these Terms, control copying, modification, and distribution of
-        that code. You must not use the BLNT Protocol name or project identity to falsely claim
-        endorsement, sponsorship, or affiliation.
+        that code. You must not use the BLNT Protocol or BLNT Trade name or project identity to
+        falsely claim endorsement, sponsorship, or affiliation.
       </Paragraph>
 
       <SectionHeading>8. Availability and changes</SectionHeading>
@@ -183,7 +182,9 @@ export const TOS = () => {
       <SectionHeading>12. Contact</SectionHeading>
 
       <Paragraph>
-        Questions about the Site or these Terms may be submitted through the{' '}
+        Questions about the Site or these Terms may be sent to{' '}
+        <Link href="mailto:blntprotocol@gmail.com">blntprotocol@gmail.com</Link>. Technical issues
+        may also be submitted through the{' '}
         <Link href="https://github.com/blnt-protocol" target="_blank" rel="noreferrer">
           BLNT Protocol GitHub organization
         </Link>

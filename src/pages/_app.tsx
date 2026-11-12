@@ -2,6 +2,7 @@ import '/public/fonts/dm-sans.css';
 
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
+import { Networks } from '@stellar/stellar-sdk';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppProps } from 'next/app';
 import dynamic from 'next/dynamic';
@@ -19,10 +20,16 @@ const WalletProvider = dynamic<React.PropsWithChildren>(
 export default function MyApp(props: AppProps) {
   const { Component, pageProps } = props;
   const [queryClient] = useState(() => new QueryClient());
+  const isTestnet = process.env.NEXT_PUBLIC_PASSPHRASE === Networks.TESTNET;
 
   return (
     <>
       <Head>
+        <title>{isTestnet ? 'BLNT Trade — Testnet' : 'BLNT Trade'}</title>
+        <meta
+          name="description"
+          content="BLNT Trade is a web interface for BLNT V3 and supported Blend markets on Stellar testnet."
+        />
         <meta name="viewport" content="initial-scale=1, width=device-width" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
