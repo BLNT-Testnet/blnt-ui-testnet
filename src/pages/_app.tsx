@@ -25,7 +25,11 @@ export default function MyApp(props: AppProps) {
   return (
     <>
       <Head>
-        <title>{isTestnet ? 'BLNT Trade — Testnet' : 'BLNT Trade'}</title>
+        <title>
+          {isTestnet
+            ? 'BLNT Trade Testnet | Lending Markets on Stellar'
+            : 'BLNT Trade | Lending Markets on Stellar'}
+        </title>
         <meta
           name="description"
           content="BLNT Trade is a web interface for BLNT V3 and supported Blend markets on Stellar testnet."
