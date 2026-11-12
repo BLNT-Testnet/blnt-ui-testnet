@@ -27,7 +27,9 @@ const Markets: NextPage = () => {
     <>
       <Row sx={{ alignItems: 'center' }}>
         <SectionBase type="alt" sx={{ margin: '6px', padding: '6px' }}>
-          Markets
+          <Typography component="h1" variant="h1">
+            Markets
+          </Typography>
         </SectionBase>
         {ENABLED_VERSIONS.length > 1 && version !== undefined && (
           <ToggleSlider
