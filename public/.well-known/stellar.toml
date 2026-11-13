@@ -1,14 +1,24 @@
+VERSION = "2.7.0"
 NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
 
 [DOCUMENTATION]
-ORG_NAME = "BLNT Protocol Contributors"
+ORG_NAME = "BLNT Protocol LLC"
+ORG_DBA = "BLNT Trade"
 ORG_URL = "https://blent.trade"
+ORG_LOGO = "https://blent.trade/icons/tokens/blnt.png"
+ORG_DESCRIPTION = "BLNT Trade operates the BLNT V3 testnet environment for protocol testing and demonstrations."
 ORG_GITHUB = "BLNT-Protocol"
+ORG_OFFICIAL_EMAIL = "contact@blent.trade"
+ORG_SUPPORT_EMAIL = "contact@blent.trade"
 
 [[CURRENCIES]]
 code = "BLNT"
 issuer = "GAOGCZLQ6KA2JMS6GJYCSJ6EDMRJPKQPHO37ZBZVR73FQEJVX3G7JV2C"
+status = "test"
 display_decimals = 7
-name = "BLNT Protocol"
-desc = "Utility token for BLNT V3, an immutable lending protocol derived from Blend and designed to support real-world assets."
+name = "BLNT Testnet"
+desc = "Test token for the BLNT V3 testnet environment."
+conditions = "Testnet-only asset; supply may be issued for testing."
 image = "https://blent.trade/icons/tokens/blnt.png"
+is_unlimited = true
+is_asset_anchored = false
