@@ -8,6 +8,7 @@ ORG_URL = "https://blent.trade"
 ORG_LOGO = "https://blent.trade/icons/tokens/blnt.png"
 ORG_DESCRIPTION = "BLNT Trade operates the BLNT V3 testnet environment for protocol testing and demonstrations."
 ORG_GITHUB = "BLNT-Protocol"
+ORG_TWITTER = "BlntProtocol"
 ORG_OFFICIAL_EMAIL = "contact@blent.trade"
 ORG_SUPPORT_EMAIL = "contact@blent.trade"
 

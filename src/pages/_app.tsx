@@ -57,7 +57,7 @@ export default function MyApp(props: AppProps) {
         '@id': ORGANIZATION_ID,
         name: 'BLNT Protocol',
         url: `${MAINNET_SITE_URL}/`,
-        sameAs: ['https://github.com/BLNT-Protocol'],
+        sameAs: ['https://github.com/BLNT-Protocol', 'https://x.com/BlntProtocol'],
       },
       {
         '@type': 'WebSite',
@@ -99,6 +99,7 @@ export default function MyApp(props: AppProps) {
         <meta property="og:image:height" content="512" />
         <meta property="og:image:alt" content="BLNT logo" />
         <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@BlntProtocol" />
         <meta name="twitter:title" content={metadata.title} />
         <meta name="twitter:description" content={metadata.description} />
         <meta name="twitter:image" content={`${siteUrl}/icon-512x512.png`} />
