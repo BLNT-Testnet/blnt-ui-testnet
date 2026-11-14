@@ -31,9 +31,9 @@ export default function MyApp(props: AppProps) {
   const pageMetadata: Record<string, { title: string; description: string }> = {
     '/': { title: defaultTitle, description: defaultDescription },
     '/backfill': {
-      title: `BLNT Backfill Claims | ${siteName}`,
+      title: `BLNT Backfill Emissions | ${siteName}`,
       description:
-        'Review BLNT backfill emissions, contributor grants, and lockup allocations through the BLNT Trade testnet interface.',
+        'Review and claim BLNT backfill emissions for eligible pre-incident BLND:USDC Comet V1 LP holders through the BLNT Trade testnet interface.',
     },
     '/termsofservice': {
       title: `Terms of Use | ${siteName}`,
