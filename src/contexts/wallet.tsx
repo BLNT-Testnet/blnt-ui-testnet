@@ -34,9 +34,21 @@ import { useSettings } from './settings';
 
 type WalletKit = typeof import('@creit.tech/stellar-wallets-kit').StellarWalletsKit;
 type WalletKitNetwork = import('@creit.tech/stellar-wallets-kit').Networks;
-type WalletConnectModuleInstance = import('@creit.tech/stellar-wallets-kit').ModuleInterface & {
+type WalletModule = import('@creit.tech/stellar-wallets-kit').ModuleInterface;
+type WalletModuleConstructor = new () => WalletModule;
+type WalletConnectModuleInstance = WalletModule & {
   disconnect(): Promise<void>;
 };
+type WalletConnectModuleConstructor = new (options: {
+  projectId: string;
+  metadata: {
+    name: string;
+    description: string;
+    url: string;
+    icons: string[];
+  };
+  allowedChains: string[];
+}) => WalletConnectModuleInstance;
 type BackstopActionArgs = PoolBackstopActionArgs | TierBackstopActionArgsV3;
 const POOL_WASM_V2 = 'a41fc53d6753b6c04eb15b021c55052366a4c8e0e21bc72700f461264ec1350e';
 
@@ -51,6 +63,10 @@ function backstopV2Id(poolMeta: PoolMeta): string {
 }
 
 const WALLET_CONNECT_ID = 'wallet_connect';
+
+function bytesToHex(value: Uint8Array): string {
+  return Array.from(value, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
 
 export interface IWalletContext {
   connected: boolean;
@@ -167,15 +183,15 @@ async function getWalletKit(): Promise<WalletKit> {
 
 async function initializeWalletKit(): Promise<WalletKit> {
   const [
-    { Networks: WalletKitNetworks, StellarWalletsKit },
-    { AlbedoModule },
-    { FreighterModule },
-    { HanaModule },
-    { HotWalletModule },
-    { LedgerModule },
-    { LobstrModule },
-    { WalletConnectModule, WalletConnectTargetChain },
-    { XBULL_ID, xBullModule },
+    walletKitExports,
+    albedoExports,
+    freighterExports,
+    hanaExports,
+    hotWalletExports,
+    ledgerExports,
+    lobstrExports,
+    walletConnectExports,
+    xBullExports,
   ] = await Promise.all([
     import('@creit.tech/stellar-wallets-kit'),
     import('@creit.tech/stellar-wallets-kit/modules/albedo'),
@@ -187,6 +203,31 @@ async function initializeWalletKit(): Promise<WalletKit> {
     import('@creit.tech/stellar-wallets-kit/modules/wallet-connect'),
     import('@creit.tech/stellar-wallets-kit/modules/xbull'),
   ]);
+
+  const { Networks: WalletKitNetworks, StellarWalletsKit } = walletKitExports;
+  // Wallet-kit 2.7.1 ships declarations beside these ESM files but does not
+  // associate them with its subpath export map. Keep the cast at this package
+  // boundary while retaining the concrete module interfaces used below.
+  const { AlbedoModule } = albedoExports as unknown as {
+    AlbedoModule: WalletModuleConstructor;
+  };
+  const { FreighterModule } = freighterExports as unknown as {
+    FreighterModule: WalletModuleConstructor;
+  };
+  const { HanaModule } = hanaExports as unknown as { HanaModule: WalletModuleConstructor };
+  const { HotWalletModule } = hotWalletExports as unknown as {
+    HotWalletModule: WalletModuleConstructor;
+  };
+  const { LedgerModule } = ledgerExports as unknown as { LedgerModule: WalletModuleConstructor };
+  const { LobstrModule } = lobstrExports as unknown as { LobstrModule: WalletModuleConstructor };
+  const { WalletConnectModule, WalletConnectTargetChain } = walletConnectExports as unknown as {
+    WalletConnectModule: WalletConnectModuleConstructor;
+    WalletConnectTargetChain: { PUBLIC: string; TESTNET: string };
+  };
+  const { XBULL_ID, xBullModule } = xBullExports as unknown as {
+    XBULL_ID: string;
+    xBullModule: WalletModuleConstructor;
+  };
 
   if (!walletConnectModule) {
     const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
@@ -279,7 +320,6 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
         }, 750);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoConnect]);
 
   function setFailureMessage(message: string | undefined) {
@@ -431,7 +471,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       .setSorobanData(sim.restorePreamble.transactionData.build())
       .addOperation(Operation.restoreFootprint({}))
       .build();
-    let signed_restore_tx = new Transaction(await sign(restore_tx.toXDR()), network.passphrase);
+    let signed_restore_tx = new Transaction(await sign(restore_tx.toXdr()), network.passphrase);
     setTxType(TxType.PREREQ);
     await sendTransaction(signed_restore_tx);
   }
@@ -469,7 +509,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       return false;
     }
 
-    let hash = transaction.hash().toString('hex');
+    let hash = bytesToHex(transaction.hash());
     setTxHash(hash);
     if (get_tx_response.status === 'SUCCESS') {
       console.log('Successfully submitted transaction: ', hash);
@@ -518,7 +558,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       const transaction = tx_builder.build();
       const simResponse = await simulateOperation(operation);
       const assembled_tx = rpc.assembleTransaction(transaction, simResponse).build();
-      const extended_tx = addReflectorEntries(assembled_tx.toXDR());
+      const extended_tx = addReflectorEntries(assembled_tx.toXdr());
       console.log('Sending transaction to wallet: ', extended_tx);
       const signedTx = await sign(extended_tx);
       const tx = new Transaction(signedTx, network.passphrase);
@@ -556,7 +596,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
         poolMeta.version === Version.V3
           ? new PoolContractV3(poolMeta.id)
           : new PoolContractV2(poolMeta.id);
-      const operation = xdr.Operation.fromXDR(pool.submit(submitArgs), 'base64');
+      const operation = xdr.Operation.fromXdr(pool.submit(submitArgs), 'base64');
       if (sim) {
         return await simulateOperation(operation);
       }
@@ -583,7 +623,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
         poolMeta.version === Version.V3
           ? new PoolContractV3(poolMeta.id)
           : new PoolContractV2(poolMeta.id);
-      const operation = xdr.Operation.fromXDR(pool.claim(claimArgs), 'base64');
+      const operation = xdr.Operation.fromXdr(pool.claim(claimArgs), 'base64');
       if (sim) {
         return await simulateOperation(operation);
       }
@@ -618,7 +658,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
           : new BackstopContractV1(BACKSTOP_IDS[Version.V1]).deposit(
               args as PoolBackstopActionArgs
             );
-      const operation = xdr.Operation.fromXDR(operationString, 'base64');
+      const operation = xdr.Operation.fromXdr(operationString, 'base64');
       if (sim) {
         return await simulateOperation(operation);
       }
@@ -656,7 +696,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
           : new BackstopContractV1(BACKSTOP_IDS[Version.V1]).withdraw(
               args as PoolBackstopActionArgs
             );
-      const operation = xdr.Operation.fromXDR(operationString, 'base64');
+      const operation = xdr.Operation.fromXdr(operationString, 'base64');
       if (sim) {
         return await simulateOperation(operation);
       }
@@ -695,7 +735,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
           : new BackstopContractV1(BACKSTOP_IDS[Version.V1]).queueWithdrawal(
               args as PoolBackstopActionArgs
             );
-      const operation = xdr.Operation.fromXDR(operationString, 'base64');
+      const operation = xdr.Operation.fromXdr(operationString, 'base64');
       if (sim) {
         return await simulateOperation(operation);
       }
@@ -733,7 +773,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
           : new BackstopContractV1(BACKSTOP_IDS[Version.V1]).dequeueWithdrawal(
               args as PoolBackstopActionArgs
             );
-      const operation = xdr.Operation.fromXDR(operationString, 'base64');
+      const operation = xdr.Operation.fromXdr(operationString, 'base64');
       if (sim) {
         return await simulateOperation(operation);
       }
@@ -774,9 +814,9 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
         );
       }
       if (sim) {
-        return await simulateOperation(xdr.Operation.fromXDR(operation, 'base64'));
+        return await simulateOperation(xdr.Operation.fromXdr(operation, 'base64'));
       }
-      await invokeSorobanOperation(xdr.Operation.fromXDR(operation, 'base64'));
+      await invokeSorobanOperation(xdr.Operation.fromXdr(operation, 'base64'));
       if (typeof claimArgs.pool_addresses[0] === 'string') {
         cleanBackstopPoolCache(claimArgs.pool_addresses[0]);
       } else {
@@ -904,7 +944,7 @@ export const WalletProvider: React.FC<React.PropsWithChildren> = ({ children }) 
           tx_builder.addOperation(trustlineOperation);
         }
         const transaction = tx_builder.build();
-        const signedTx = await sign(transaction.toXDR());
+        const signedTx = await sign(transaction.toXdr());
         const tx = new Transaction(signedTx, network.passphrase);
         setTxType(TxType.PREREQ);
         const result = await sendTransaction(tx);
