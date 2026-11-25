@@ -66,6 +66,7 @@ import {
   loadBackfillEmissionsState,
   loadBackfillSwapState,
 } from '../utils/blnt_backfill';
+import { BlntProtocolStats, loadBlntProtocolStats } from '../utils/blnt_stats';
 import { getOraclePrices } from '../utils/stellar_rpc';
 import { ReserveTokenMetadata } from '../utils/token';
 import {
@@ -103,6 +104,7 @@ export function useQueryClientCacheCleaner(): {
         query.queryKey[0] === 'balance' ||
         query.queryKey[0] === 'account' ||
         query.queryKey[0] === 'backfillEmissions' ||
+        query.queryKey[0] === 'backstopManager' ||
         query.queryKey[0] === 'backfillSwap' ||
         query.queryKey[0] === 'sim',
     });
@@ -199,6 +201,40 @@ export function useBackfillSwapState(
     queryKey: ['backfillSwap', BLNT_BACKFILL_ID],
     enabled: enabled && BLNT_BACKFILL_ID !== '',
     queryFn: () => loadBackfillSwapState(network, BLNT_BACKFILL_ID),
+  });
+}
+
+/** Fetch protocol-wide BLNT and configured V3 market statistics. */
+export function useBlntProtocolStats(
+  enabled: boolean = true
+): UseQueryResult<BlntProtocolStats, Error> {
+  const { network, configuredPools } = useSettings();
+  const v3Pools = configuredPools
+    .filter((pool) => pool.version === Version.V3)
+    .map((pool) => ({ id: pool.id, name: pool.name }));
+
+  return useQuery({
+    staleTime: DEFAULT_STALE_TIME,
+    refetchInterval: DEFAULT_STALE_TIME,
+    queryKey: [
+      'blntProtocolStats',
+      network.rpc,
+      network.horizonUrl,
+      ...v3Pools.map((pool) => pool.id),
+    ],
+    enabled,
+    queryFn: () =>
+      loadBlntProtocolStats(network, {
+        backfillId: BLNT_BACKFILL_ID,
+        lockupBackfillId: process.env.NEXT_PUBLIC_BLNT_LOCKUP_BACKFILL ?? '',
+        backstopId: BACKSTOP_IDS[Version.V3],
+        blntTokenId: BLND_TOKEN_ID,
+        blntIssuer: process.env.NEXT_PUBLIC_BLNT_ISSUER ?? '',
+        usdcTokenId: USDC_TOKEN_ID,
+        blntUsdcCometId: BLND_USDC_COMET_ID,
+        oraclePriceFetcher: ORACLE_PRICE_FETCHER,
+        pools: v3Pools,
+      }),
   });
 }
 
